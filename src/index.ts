@@ -24,7 +24,7 @@ function createServer(env: OfficeEnv, authorization: string) {
   const server = new McpServer({ name: "ChatGPT Office", version: "2.0.0" });
 
   async function callOffice(tool: string, input: Record<string, unknown>) {
-    const base = env.OFFICE_API_BASE_URL?.trim().replace(/\\/$/, "");
+    const base = env.OFFICE_API_BASE_URL?.trim().replace(/\/$/, "");
     if (!base) {
       return textResult("Office backend is not configured (OFFICE_API_BASE_URL). No task data was accessed.", true);
     }
@@ -35,7 +35,7 @@ function createServer(env: OfficeEnv, authorization: string) {
       if (endpoint.protocol !== "https:" || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) {
         throw new Error("invalid endpoint");
       }
-      endpoint = new URL(endpoint.pathname.replace(/\\/$/, "") + TOOLS_PREFIX + "/" + tool, endpoint.origin);
+      endpoint = new URL(endpoint.pathname.replace(/\/$/, "") + TOOLS_PREFIX + "/" + tool, endpoint.origin);
     } catch {
       return textResult("OFFICE_API_BASE_URL must be an HTTPS URL without credentials, query or fragment.", true);
     }
@@ -131,7 +131,7 @@ export default {
     // see README.md. Having a bearer token alone does NOT grant user access;
     // the Office API must verify it on every call.
     const authorization = request.headers.get("Authorization") || "";
-    if (!/^Bearer\\s+\\S+$/i.test(authorization)) {
+    if (!/^Bearer\s+\S+$/i.test(authorization)) {
       return Response.json(
         { error: "authentication_required", message: "A per-user OAuth access token is required." },
         { status: 401, headers: { "WWW-Authenticate": 'Bearer realm="ChatGPT Office"' } },
